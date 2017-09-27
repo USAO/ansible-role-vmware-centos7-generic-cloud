@@ -9,9 +9,7 @@
   unarchive:
     src: "/tmp/{{ vmware_centos7_generic_cloud_image }}.raw.tar.gz"
     dest: "/tmp/"
-    owner: apache
-    group: apache
-    copy: no
+    remote_src: yes
 
 - name: Ensure /tmp/user-data exists
   file:

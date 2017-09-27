@@ -1,0 +1,5 @@
+---
+# defaults file for vmware-centos7-generic-cloud
+
+vmware_centos7_generic_cloud_images_url: 'http://cloud.centos.org/centos/7/images/'
+vmware_centos7_generic_cloud_image: 'CentOS-7-x86_64-GenericCloud-1708'

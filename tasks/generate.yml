@@ -1,0 +1,34 @@
+---
+
+- name: Get centos 7 generic cloud image
+  get_url:
+    url: "{{ vmware_centos7_generic_cloud_images_url }}{{ vmware_centos7_generic_cloud_image }}.raw.tar.gz"
+    dest: "/tmp/{{ vmware_centos7_generic_cloud_image }}.raw.tar.gz"
+
+- name: Unarchive centos 7 generic cloud image
+  unarchive:
+    src: "/tmp/{{ vmware_centos7_generic_cloud_image }}.raw.tar.gz"
+    dest: "/tmp/"
+    owner: apache
+    group: apache
+    copy: no
+
+- name: Ensure /tmp/user-data exists
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /tmp/user-data
+
+- name: Template cloud-init user-data
+  template:
+    src: user-data.txt.j2
+    dest: /tmp/user-data/user-data.txt
+
+- name: Convert raw centos 7 generic cloud image to vmdk
+  command: >
+    qemu-img convert -O vmdk /tmp/{{ vmware_centos7_generic_cloud_image }}.raw /vagrant/{{ vmware_centos7_generic_cloud_image }}.vmdk
+
+- name: Write cloud-init user-data to ISO
+  command: >
+    genisoimage -o /vagrant/userdata.iso -r /tmp/user-data

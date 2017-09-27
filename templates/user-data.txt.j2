@@ -1,0 +1,45 @@
+#cloud-config
+---
+
+users:
+  - name: {{ vmware_centos7_generic_cloud_user_data_username }}
+    lock_passwd: true
+    groups: [wheel, adm, systemd-journal]
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - {{ vmware_centos7_generic_cloud_user_data_userkey }}
+
+runcmd:
+  - |
+    ifconfig_path=$(find /etc/sysconfig/network-scripts -type f -name "ifcfg-*" | sort | head -1)
+    ifconfig_device=$(grep 'DEVICE' $ifconfig_path | cut -d '=' -f 2)
+    ifconfig_hwaddr=$(grep 'HWADDR' $ifconfig_path | cut -d '=' -f 2)
+    printf "BOOTPROTO=none
+    DEVICE=%s
+    HWADDR=%s
+    ONBOOT=yes
+    TYPE=Ethernet
+    USERCTL=yes
+    PEERDNS=yes
+    IPV6INIT=no
+    DEFROUTE=yes
+    IPADDR={{ vmware_centos7_generic_cloud_user_data_ipaddr }}
+    PREFIX={{ vmware_centos7_generic_cloud_user_data_prefix }}
+    GATEWAY={{ vmware_centos7_generic_cloud_user_data_gw }}
+    DNS1={{ vmware_centos7_generic_cloud_user_data_dns1 }}
+    DNS2={{ vmware_centos7_generic_cloud_user_data_dns2 }}
+    DNS3={{ vmware_centos7_generic_cloud_user_data_dns3 }}
+    DNS4={{ vmware_centos7_generic_cloud_user_data_dns4 }}
+    DOMAIN={{ vmware_centos7_generic_cloud_user_data_domain }}" "${ifconfig_device}" "${ifconfig_hwaddr}" >${ifconfig_path}
+  # CentOS generic cloud image has a not-usable-without-setting-boot-options nic config
+  - rm /etc/sysconfig/network-scripts/ifcfg-eth0
+  # Work around a vmxnet3 issue on esx 6.x.
+  - ethtool -K ${ifconfig_device} gro off
+  # Work around a vmxnet3 issue on esx 6.x.
+  - ethtool -K ${ifconfig_device} lro off
+  - systemctl restart network
+  - yum -y install open-vm-tools
+  - systemctl start vmtoolsd
+  - systemctl enable vmtoolsd
+  - systemctl mask cloud-init-local cloud-init cloud-config cloud-final

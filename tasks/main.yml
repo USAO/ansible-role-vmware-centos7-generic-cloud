@@ -1,0 +1,10 @@
+---
+# tasks file for vmware-centos7-generic-cloud
+
+- include: yum.yml
+  become: true
+  tags: vmware-centos7-generic-cloud_yum
+
+- include: generate.yml
+  become: true
+  tags: vmware-centos7-generic-cloud_generate

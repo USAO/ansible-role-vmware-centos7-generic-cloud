@@ -3,3 +3,6 @@
 
 vmware_centos7_generic_cloud_images_url: 'http://cloud.centos.org/centos/7/images/'
 vmware_centos7_generic_cloud_image: 'CentOS-7-x86_64-GenericCloud-1708'
+vmware_centos7_generic_user_data_dir: '/tmp/user-data'
+vmware_centos7_generic_cloud_image_dir: '/tmp'
+vmware_centos7_generic_cloud_output_dir: "{{ ansible_env.HOME }}"
